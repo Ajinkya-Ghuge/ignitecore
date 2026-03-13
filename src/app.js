@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { connectDB } from "./db/index.js";
 
 import healthcheckRouter from "./routes/healthcheck.routes.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
@@ -9,6 +10,11 @@ import entriesRouter from "./routes/entries.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
 
 const app = express();
+
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 app.use(cors({
   origin: process.env.CORS_ORIGIN,
