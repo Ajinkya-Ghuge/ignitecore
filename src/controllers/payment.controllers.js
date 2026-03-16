@@ -7,6 +7,16 @@ import axios from "axios";
 import { generateQRCode } from "../services/qr.service.js";
 import { uploadQR } from "../services/upload.service.js";
 import { sendTicketEmail } from "../services/email.service.js";
+import crypto from "crypto";
+
+const verifySignature = (payload, signature, secret) => {
+  const generated = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("base64");
+
+  return generated === signature;
+};
 
 const createPaymentOrder = asyncHandler(async (req, res) => {
 
@@ -54,8 +64,13 @@ const createPaymentOrder = asyncHandler(async (req, res) => {
 
   try {
 
+    const CASHFREE_URL =
+    process.env.CASHFREE_ENV === "PRODUCTION"
+      ? "https://api.cashfree.com/pg/orders"
+      : "https://sandbox.cashfree.com/pg/orders";
+
     const response = await axios.post(
-      "https://sandbox.cashfree.com/pg/orders",
+      CASHFREE_URL,
       requestPayload,
       {
         headers: {
